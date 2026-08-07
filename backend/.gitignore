@@ -1,0 +1,22 @@
+# Sirlar — HECH QACHON GitHub'ga chiqmaydi
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Ma'lumotlar bazasi / media
+*.db
+*.sqlite3
+media/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store

@@ -1,0 +1,32 @@
+# Sirlar
+**/.env
+*.env
+!**/.env.example
+
+# Python / backend
+backend/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite3
+
+# Flutter / mobile
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/build/
+mobile/.idea/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/.pub-cache/
+mobile/pubspec.lock
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
