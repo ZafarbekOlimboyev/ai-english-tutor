@@ -14,7 +14,11 @@ from app.config import settings
 _http_opts = (
     types.HttpOptions(base_url=settings.gemini_base_url) if settings.gemini_base_url else None
 )
-client = genai.Client(api_key=settings.gemini_api_key, http_options=_http_opts)
+client = (
+    genai.Client(api_key=settings.gemini_api_key, http_options=_http_opts)
+    if settings.gemini_api_key
+    else None
+)
 
 
 class LLMUnavailable(Exception):
@@ -43,6 +47,8 @@ def _generate(contents, config) -> types.GenerateContentResponse:
 
     Provider xatoси -> LLMUnavailable (to'lanmadi, refund mumkin).
     """
+    if client is None:
+        raise LLMUnavailable()  # GEMINI_API_KEY sozlanmagан
     try:
         return client.models.generate_content(
             model=settings.gemini_model, contents=contents, config=config

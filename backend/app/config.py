@@ -6,7 +6,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    gemini_api_key: str
+    gemini_api_key: str = ""  # bo'sh bo'lsa ilova baribir ishga tushadi (LLM -> 503), kalitни deploy'да bering
     gemini_model: str = "gemini-flash-latest"
     # Asosiy model kvotasi (429) tugasa avtomatik shu modelга o'tiladi (kvota model-boshiga)
     gemini_fallback_model: str = "gemini-flash-lite-latest"

@@ -35,6 +35,8 @@ def transcribe(audio_bytes: bytes, mime_type: str) -> str:
     Provider yiqilса LLMUnavailable (to'lanmadi). Bo'sh natija -> "" (chaqiruvchи 422 qiladi,
     lekin Gemini ishlagani uchun budjet qaytmaydi).
     """
+    if client is None:
+        raise LLMUnavailable()  # GEMINI_API_KEY sozlanmagан
     contents = [
         types.Part.from_bytes(data=audio_bytes, mime_type=mime_type),
         "Transcribe this English audio to text. Output ONLY the transcription, nothing else.",
@@ -56,6 +58,8 @@ def transcribe(audio_bytes: bytes, mime_type: str) -> str:
 
 def synthesize(text: str) -> bytes:
     """TTS: matn -> WAV baytlari. Kvota tugasa zaxira TTS modelга o'tadi."""
+    if client is None:
+        raise LLMUnavailable()  # GEMINI_API_KEY sozlanmagан
     config = types.GenerateContentConfig(
         response_modalities=["AUDIO"],
         speech_config=types.SpeechConfig(
