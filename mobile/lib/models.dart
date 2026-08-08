@@ -1,4 +1,4 @@
-/// Backend javoblariга mos data klasslar.
+// Backend javoblariга mos data klasslar.
 
 class Scenario {
   final String id;

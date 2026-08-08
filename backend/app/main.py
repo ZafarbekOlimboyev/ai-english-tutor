@@ -1,6 +1,8 @@
 import base64
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
+from fastapi.responses import FileResponse
 
 from app import db, llm, scenarios, voice
 from app.auth import get_current_user
@@ -19,11 +21,15 @@ from app.schemas import (
     SttResponse,
     TtsRequest,
     VoiceTurnResponse,
+    WaitlistRequest,
 )
 
 app = FastAPI(title=settings.app_name, version=settings.app_version)
 
 db.init_db()
+
+# Landing sayt (repo ildizидаги landing/index.html)
+_LANDING = Path(__file__).resolve().parent.parent.parent / "landing" / "index.html"
 
 _UNAVAILABLE = "AI hozir javob bera olmadi. Iltimos, birozdan keyin qayta urining."
 _GLOBAL = "__global__"  # aggregat LLM hisoblagichи uchun sentinel user_id
@@ -33,6 +39,25 @@ _GLOBAL = "__global__"  # aggregat LLM hisoblagichи uchun sentinel user_id
 def health():
     """Server tirikligini tekshirish."""
     return {"status": "ok", "app": settings.app_name, "version": settings.app_version}
+
+
+@app.get("/", include_in_schema=False)
+def landing():
+    """Marketing landing sayti."""
+    if _LANDING.exists():
+        return FileResponse(_LANDING)
+    return {"app": settings.app_name, "version": settings.app_version}
+
+
+@app.post("/waitlist")
+def join_waitlist(req: WaitlistRequest, request: Request):
+    """Waitlist'ga qo'shilish (landing formasi). IP bo'yicha cheklangan."""
+    ip = _client_ip(request)
+    if not db.try_consume(f"wl:{ip}", "llm_calls", 20):  # kuniga 20/IP (spam himoya)
+        raise HTTPException(status_code=429, detail="Juda ko'p urinish. Keyinroq urining.")
+    is_new = db.add_waitlist(req.email, "landing")
+    db.log_event(None, "waitlist", {"new": is_new})
+    return {"ok": True, "already": not is_new, "count": db.waitlist_count()}
 
 
 # ---------------- Auth ----------------

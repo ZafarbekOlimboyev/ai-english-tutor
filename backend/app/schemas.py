@@ -18,6 +18,19 @@ class RegisterResponse(BaseModel):
     level: str | None = None
 
 
+class WaitlistRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=254)
+
+    @field_validator("email")
+    @classmethod
+    def _valid_email(cls, v: str) -> str:
+        v = v.strip().lower()
+        import re
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", v):
+            raise ValueError("email noto'g'ri")
+        return v
+
+
 class MeResponse(BaseModel):
     user_id: str
     name: str | None = None

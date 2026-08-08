@@ -92,6 +92,13 @@ def init_db() -> None:
                 created_at TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS waitlist (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                email      TEXT UNIQUE NOT NULL,
+                source     TEXT,
+                created_at TEXT NOT NULL
+            );
+
             CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id);
             CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
             CREATE INDEX IF NOT EXISTS idx_events_user ON events(user_id);
@@ -291,6 +298,24 @@ def get_today_usage(user_id: str) -> sqlite3.Row | None:
 
 
 # ---------------- Analytics ----------------
+
+def add_waitlist(email: str, source: str | None) -> bool:
+    """Waitlist'ga email qo'shadi. Yangi bo'lsa True, allaqachon bor bo'lsa False."""
+    conn = get_conn()
+    with _lock:
+        cur = conn.execute(
+            "INSERT OR IGNORE INTO waitlist (email, source, created_at) VALUES (?, ?, ?)",
+            (email.lower().strip(), source, _now()),
+        )
+        conn.commit()
+        return cur.rowcount == 1
+
+
+def waitlist_count() -> int:
+    conn = get_conn()
+    with _lock:
+        return conn.execute("SELECT COUNT(*) AS c FROM waitlist").fetchone()["c"]
+
 
 def log_event(user_id: str | None, type_: str, payload: dict | None = None) -> None:
     conn = get_conn()
