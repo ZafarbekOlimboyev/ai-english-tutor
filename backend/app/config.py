@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     app_name: str = "AI English Tutor"
     app_version: str = "0.4.0"
 
+    # Ma'lumotlar bazasi yo'li. Bo'sh bo'lsa backend/argus_tutor.db.
+    # Railway'да doimiy saqlash uchun volume yo'lини bering: masalan /data/argus_tutor.db
+    db_path: str = ""
+
     # --- Ekonomika himoyasi (bepul foydalanuvchi uchun) ---
     free_daily_limit: int = 1          # kuniga nechta suhbat BOSHLASH mumkin
     free_daily_llm_calls: int = 40     # kuniga jami pullik LLM chaqiruvi (message+feedback+assess)

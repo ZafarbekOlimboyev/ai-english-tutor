@@ -11,7 +11,12 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent.parent / "argus_tutor.db"
+from app.config import settings
+
+# DB yo'li: env (DB_PATH) berilса o'sha (Railway volume uchun), aks holда backend/argus_tutor.db
+DB_PATH = Path(settings.db_path) if settings.db_path else (
+    Path(__file__).resolve().parent.parent / "argus_tutor.db"
+)
 
 # Kunlik hisoblagich ustunlari — faqat shu nomlar SQL'ga qo'yiladi (foydalanuvchi kiritmaydi)
 _COUNTERS = {"sessions_started", "llm_calls"}
@@ -35,6 +40,7 @@ def today() -> str:
 def get_conn() -> sqlite3.Connection:
     global _conn
     if _conn is None:
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)  # volume yo'li uchun
         _conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         _conn.row_factory = sqlite3.Row
         _conn.execute("PRAGMA journal_mode=WAL")
