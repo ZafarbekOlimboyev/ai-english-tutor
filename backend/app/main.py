@@ -263,8 +263,10 @@ def get_feedback(session_id: str, user=Depends(get_current_user)):
         f"Their lines:\n{transcript}"
     )
     system = (
-        "You are a kind English tutor giving post-conversation feedback. "
-        "Be encouraging. Pick only the 2-3 most useful corrections."
+        "You are a kind English tutor giving post-conversation feedback to an UZBEK learner. "
+        "Write the 'encouragement' field and every correction 'tip' field in UZBEK, so the learner "
+        "fully understands. Keep 'original' and 'better' in English (they are the English examples), "
+        "and 'new_words' in English. Be encouraging. Pick only the 2-3 most useful corrections."
     )
     fb = _run_paid(user, lambda: llm.structured(prompt, Feedback, system))
     db.log_event(user["id"], "feedback", {"session_id": session_id, "score": fb.fluency_score})
@@ -279,7 +281,11 @@ def assess_level(req: AssessRequest, user=Depends(get_current_user)):
         "Estimate this English learner's CEFR level from their spoken samples.\n"
         f"Samples:\n{joined}"
     )
-    system = "You are an English placement assessor. Be fair and encouraging."
+    system = (
+        "You are an English placement assessor for an UZBEK learner. Estimate the CEFR 'level' "
+        "(A1/A2/B1/B2/C1). Write the 'summary' and 'focus' fields in UZBEK so the learner understands. "
+        "Be fair and encouraging."
+    )
     result = _run_paid(user, lambda: llm.structured(prompt, LevelResult, system))
     db.update_user_level(user["id"], result.level)
     db.log_event(user["id"], "assess", {"level": result.level})
