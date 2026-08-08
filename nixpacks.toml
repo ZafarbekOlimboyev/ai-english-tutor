@@ -1,0 +1,4 @@
+# Railway/Nixpacks — ffmpeg qo'shamiz (web audio: webm/mp4 -> wav transcode uchun).
+# "..." mavjud (avtomatik aniqlangан) paketlarни saqlaydi, ustiga qo'shadi.
+[phases.setup]
+aptPkgs = ["...", "ffmpeg"]

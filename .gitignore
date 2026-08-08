@@ -31,3 +31,6 @@ mobile/pubspec.lock
 .idea/
 .DS_Store
 dist/
+
+# Flutter web build (railway up bilan yuklanadi, git'ga emas)
+backend/webapp/

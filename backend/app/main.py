@@ -3,6 +3,7 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app import db, llm, scenarios, voice
 from app.auth import get_current_user
@@ -30,6 +31,11 @@ db.init_db()
 
 # Landing sayt (repo ildizидаги landing/index.html)
 _LANDING = Path(__file__).resolve().parent.parent.parent / "landing" / "index.html"
+
+# Flutter web ilova (backend/webapp/) — /app da xizmat (iPhone Safari uchun)
+_WEBAPP = Path(__file__).resolve().parent.parent / "webapp"
+if _WEBAPP.exists():
+    app.mount("/app", StaticFiles(directory=str(_WEBAPP), html=True), name="webapp")
 
 _UNAVAILABLE = "AI hozir javob bera olmadi. Iltimos, birozdan keyin qayta urining."
 _GLOBAL = "__global__"  # aggregat LLM hisoblagichи uchun sentinel user_id

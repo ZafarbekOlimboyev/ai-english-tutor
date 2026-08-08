@@ -4,6 +4,8 @@ STT matn modeli (kvota fallback bilan) orqali; TTS alohida TTS modeli orqali.
 Xato bo'lса toza 503 (500 emas).
 """
 import io
+import shutil
+import subprocess
 import wave
 
 from google.genai import types
@@ -15,6 +17,29 @@ from app.llm import LLMBilledEmpty, LLMUnavailable, client  # bitta genai mijozi
 def _is_quota(exc: Exception) -> bool:
     s = str(exc)
     return "429" in s or "RESOURCE_EXHAUSTED" in s
+
+
+def _to_gemini_audio(audio_bytes: bytes, mime_type: str) -> tuple[bytes, str]:
+    """Brauzer (webm/mp4/ogg) audiosini Gemini qo'llaydiган wav'ga o'giradi (ffmpeg orqали).
+
+    Allaqачон wav bo'lса — tegmaydi. ffmpeg yo'q yoki xato bo'lса — asl baytlarни qaytaradi.
+    ffmpeg formatни o'zi aniqlaydi (mime muhim emas).
+    """
+    if "wav" in (mime_type or "").lower():
+        return audio_bytes, "audio/wav"
+    if not shutil.which("ffmpeg"):
+        return audio_bytes, mime_type  # ffmpeg yo'q — asl holида urinib ko'ramiz
+    try:
+        proc = subprocess.run(
+            ["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", "pipe:0",
+             "-ac", "1", "-ar", "16000", "-f", "wav", "pipe:1"],
+            input=audio_bytes, capture_output=True, timeout=30,
+        )
+        if proc.returncode == 0 and proc.stdout:
+            return proc.stdout, "audio/wav"
+    except Exception:
+        pass
+    return audio_bytes, mime_type
 
 
 def _pcm_to_wav(pcm: bytes, rate: int = 24000) -> bytes:
@@ -37,6 +62,7 @@ def transcribe(audio_bytes: bytes, mime_type: str) -> str:
     """
     if client is None:
         raise LLMUnavailable()  # GEMINI_API_KEY sozlanmagан
+    audio_bytes, mime_type = _to_gemini_audio(audio_bytes, mime_type)  # web formatни wav'ga
     contents = [
         types.Part.from_bytes(data=audio_bytes, mime_type=mime_type),
         "Transcribe this English audio to text. Output ONLY the transcription, nothing else.",
