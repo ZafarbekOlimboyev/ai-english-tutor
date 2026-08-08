@@ -30,3 +30,4 @@ mobile/pubspec.lock
 .vscode/
 .idea/
 .DS_Store
+dist/
